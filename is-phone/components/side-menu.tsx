@@ -19,13 +19,16 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import DataStatistics from "@/app/data-center/components/data-statistics"
+import CustomerManagement from "@/app/data-center/components/customer-management"
 
 // 定义产品套餐
 const packages = [
   {
     id: "2980",
     price: "2980",
-    name: "基础护理套餐",
+    name: "基础套餐",
     discount: "8折",
     originalPrice: "3725",
     products: [
@@ -53,12 +56,12 @@ const packages = [
           "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1TGLGYdVcP.jpg-yr0fZvkALLFBooIUDzd5u2EnDF2L7p.jpeg",
       },
     ],
-    savings: "745",
+    earnings: "745",
   },
   {
     id: "6980",
     price: "6980",
-    name: "进阶塑形套餐",
+    name: "进级套餐",
     discount: "7折",
     originalPrice: "9971",
     products: [
@@ -98,12 +101,12 @@ const packages = [
           "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1TGLGYdVcP.jpg-yr0fZvkALLFBooIUDzd5u2EnDF2L7p.jpeg",
       },
     ],
-    savings: "2991",
+    earnings: "2991",
   },
   {
     id: "19800",
     price: "19800",
-    name: "尊享美肤套餐",
+    name: "尊享套餐",
     discount: "6折",
     originalPrice: "33000",
     badge: "最优惠",
@@ -133,7 +136,7 @@ const packages = [
           "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/M2F2pDf6f3.jpg-LfIoV2JSzXP19zPRTAdaKSw6BCHCzJ.jpeg",
       },
     ],
-    savings: "13200",
+    earnings: "13200",
   },
 ]
 
@@ -144,12 +147,15 @@ interface SideMenuProps {
 }
 
 export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
+  const router = useRouter()
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null)
   const [selectedTools, setSelectedTools] = useState<string[]>(["moments", "autoLike"])
+  const [showDataStats, setShowDataStats] = useState(false)
+  const [showCustomerManagement, setShowCustomerManagement] = useState(false)
 
   const handleItemClick = (id: string) => {
-    if (id === "analytics" || id === "customers" || id === "supply" || id === "settings") {
+    if (id === "supply" || id === "settings") {
       setActiveSection(id)
     } else if (
       id === "autoLike" ||
@@ -171,6 +177,18 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
 
   const handleBackFromPackage = () => {
     setSelectedPackage(null)
+  }
+
+  const handleDataStatsClick = () => {
+    setShowDataStats(true)
+    setShowCustomerManagement(false)
+    setActiveSection(null)
+  }
+
+  const handleCustomerManagementClick = () => {
+    setShowCustomerManagement(true)
+    setShowDataStats(false)
+    setActiveSection(null)
   }
 
   const renderPackageDetails = (pkg: (typeof packages)[0]) => (
@@ -195,7 +213,7 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
             <span className="font-medium text-yellow-700">{pkg.discount}</span>
           </div>
         </div>
-        <div className="mt-2 text-sm text-yellow-600">预计节省: ¥{pkg.savings}</div>
+        <div className="mt-2 text-sm text-yellow-600">预计可赚: ¥{pkg.earnings}</div>
       </Card>
 
       <div className="space-y-3">
@@ -243,7 +261,27 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="w-[85%] max-w-[400px] p-0">
         <ScrollArea className="h-full py-6">
-          {activeSection === "supply" ? (
+          {showDataStats ? (
+            <div className="px-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">数据统计</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowDataStats(false)}>
+                  返回
+                </Button>
+              </div>
+              <DataStatistics />
+            </div>
+          ) : showCustomerManagement ? (
+            <div className="px-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">客户管理</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowCustomerManagement(false)}>
+                  返回
+                </Button>
+              </div>
+              <CustomerManagement />
+            </div>
+          ) : activeSection === "supply" ? (
             selectedPackage ? (
               renderPackageDetails(packages.find((p) => p.id === selectedPackage)!)
             ) : (
@@ -354,7 +392,7 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                   <Card
                     className={cn(
                       "p-2 cursor-pointer transition-colors",
-                      selectedTools.includes("autoLike") && "bg-pink-50 border-pink-200",
+                      selectedTools.includes("autoLike") ? "bg-pink-100 border-pink-300 shadow-sm" : "hover:bg-pink-50",
                     )}
                     onClick={() => handleItemClick("autoLike")}
                   >
@@ -363,13 +401,18 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                         <ThumbsUp className="w-4 h-4 text-pink-500" />
                       </div>
                       <h4 className="text-xs font-medium">自动点赞</h4>
+                      {selectedTools.includes("autoLike") && (
+                        <Badge className="bg-pink-200 text-pink-800 text-[10px] mt-1">已启用</Badge>
+                      )}
                     </div>
                   </Card>
 
                   <Card
                     className={cn(
                       "p-2 cursor-pointer transition-colors",
-                      selectedTools.includes("moments") && "bg-purple-50 border-purple-200",
+                      selectedTools.includes("moments")
+                        ? "bg-purple-100 border-purple-300 shadow-sm"
+                        : "hover:bg-purple-50",
                     )}
                     onClick={() => handleItemClick("moments")}
                   >
@@ -378,13 +421,18 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                         <Image className="w-4 h-4 text-purple-500" />
                       </div>
                       <h4 className="text-xs font-medium">朋友圈同步</h4>
+                      {selectedTools.includes("moments") && (
+                        <Badge className="bg-purple-200 text-purple-800 text-[10px] mt-1">已启用</Badge>
+                      )}
                     </div>
                   </Card>
 
                   <Card
                     className={cn(
                       "p-2 cursor-pointer transition-colors",
-                      selectedTools.includes("autoCustomer") && "bg-green-50 border-green-200",
+                      selectedTools.includes("autoCustomer")
+                        ? "bg-green-100 border-green-300 shadow-sm"
+                        : "hover:bg-green-50",
                     )}
                     onClick={() => handleItemClick("autoCustomer")}
                   >
@@ -393,13 +441,18 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                         <CircleUser className="w-4 h-4 text-green-500" />
                       </div>
                       <h4 className="text-xs font-medium">自动开发客户</h4>
+                      {selectedTools.includes("autoCustomer") && (
+                        <Badge className="bg-green-200 text-green-800 text-[10px] mt-1">已启用</Badge>
+                      )}
                     </div>
                   </Card>
 
                   <Card
                     className={cn(
                       "p-2 cursor-pointer transition-colors",
-                      selectedTools.includes("groupMessage") && "bg-orange-50 border-orange-200",
+                      selectedTools.includes("groupMessage")
+                        ? "bg-orange-100 border-orange-300 shadow-sm"
+                        : "hover:bg-orange-50",
                     )}
                     onClick={() => handleItemClick("groupMessage")}
                   >
@@ -408,13 +461,18 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                         <MessageCircle className="w-4 h-4 text-orange-500" />
                       </div>
                       <h4 className="text-xs font-medium">群消息推送</h4>
+                      {selectedTools.includes("groupMessage") && (
+                        <Badge className="bg-orange-200 text-orange-800 text-[10px] mt-1">已启用</Badge>
+                      )}
                     </div>
                   </Card>
 
                   <Card
                     className={cn(
                       "p-2 cursor-pointer transition-colors",
-                      selectedTools.includes("autoGroup") && "bg-indigo-50 border-indigo-200",
+                      selectedTools.includes("autoGroup")
+                        ? "bg-indigo-100 border-indigo-300 shadow-sm"
+                        : "hover:bg-indigo-50",
                     )}
                     onClick={() => handleItemClick("autoGroup")}
                   >
@@ -423,13 +481,16 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                         <UsersRound className="w-4 h-4 text-indigo-500" />
                       </div>
                       <h4 className="text-xs font-medium">自动建群</h4>
+                      {selectedTools.includes("autoGroup") && (
+                        <Badge className="bg-indigo-200 text-indigo-800 text-[10px] mt-1">已启用</Badge>
+                      )}
                     </div>
                   </Card>
                 </div>
               </div>
 
               <div className="px-4">
-                <h3 className="mb-4 text-lg font-semibold">业务中心</h3>
+                <h3 className="mb-4 text-lg font-semibold">采购中心</h3>
                 <Card
                   className="p-4 cursor-pointer hover:bg-accent transition-colors"
                   onClick={() => handleItemClick("supply")}
@@ -448,31 +509,30 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
 
               <div className="px-4">
                 <h3 className="mb-4 text-lg font-semibold">数据中心</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <Card
-                    className="p-4 cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => handleItemClick("analytics")}
-                  >
-                    <div className="flex items-center gap-2">
+                <div className="space-y-4">
+                  <Card className="p-4 cursor-pointer hover:bg-accent transition-colors" onClick={handleDataStatsClick}>
+                    <div className="flex items-center gap-3">
                       <div className="rounded-lg p-2 bg-blue-100">
                         <BarChart3 className="w-5 h-5 text-blue-500" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm">数据统计</h4>
+                        <h4 className="font-medium">数据统计</h4>
+                        <p className="text-sm text-muted-foreground">查看业务数据分析</p>
                       </div>
                     </div>
                   </Card>
 
                   <Card
                     className="p-4 cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => handleItemClick("customers")}
+                    onClick={handleCustomerManagementClick}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <div className="rounded-lg p-2 bg-indigo-100">
                         <Users className="w-5 h-5 text-indigo-500" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-sm">客户管理</h4>
+                        <h4 className="font-medium">客户管理</h4>
+                        <p className="text-sm text-muted-foreground">管理客户关系</p>
                       </div>
                     </div>
                   </Card>
@@ -495,6 +555,20 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
                   </div>
                 </Card>
               </div>
+
+              <div className="px-4 mt-8">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    router.push("/login")
+                    onClose()
+                  }}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  登录/注册
+                </Button>
+              </div>
             </div>
           )}
         </ScrollArea>
@@ -502,4 +576,6 @@ export function SideMenu({ isOpen, onClose, onMenuItemClick }: SideMenuProps) {
     </Sheet>
   )
 }
+
+// Make sure to export the component as a named export
 

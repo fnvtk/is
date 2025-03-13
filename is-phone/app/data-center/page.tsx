@@ -1,15 +1,12 @@
 "use client"
-
-import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
+import { Download, BarChart3, Users } from "lucide-react"
+import { useRouter } from "next/navigation"
 import BottomNav from "../components/BottomNav"
-import DataStatistics from "./components/data-statistics"
-import CustomerManagement from "./components/customer-management"
 
 export default function DataCenterPage() {
-  const [activeTab, setActiveTab] = useState("statistics")
+  const router = useRouter()
 
   return (
     <div className="container mx-auto px-4 pb-20">
@@ -21,20 +18,37 @@ export default function DataCenterPage() {
         </Button>
       </header>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 mb-4">
-          <TabsTrigger value="statistics">数据统计</TabsTrigger>
-          <TabsTrigger value="customers">客户管理</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <Card
+          className="p-6 cursor-pointer hover:bg-gray-50 transition-all border-2 hover:border-blue-200 hover:shadow-md"
+          onClick={() => router.push("/data-center/statistics")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="rounded-full p-3 bg-blue-100">
+              <BarChart3 className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium">数据统计</h3>
+              <p className="text-sm text-gray-500">查看业务数据分析和趋势</p>
+            </div>
+          </div>
+        </Card>
 
-        <TabsContent value="statistics">
-          <DataStatistics />
-        </TabsContent>
-
-        <TabsContent value="customers">
-          <CustomerManagement />
-        </TabsContent>
-      </Tabs>
+        <Card
+          className="p-6 cursor-pointer hover:bg-gray-50 transition-all border-2 hover:border-indigo-200 hover:shadow-md"
+          onClick={() => router.push("/data-center/customers")}
+        >
+          <div className="flex items-center gap-4">
+            <div className="rounded-full p-3 bg-indigo-100">
+              <Users className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium">客户管理</h3>
+              <p className="text-sm text-gray-500">管理微信客户和标签</p>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       <BottomNav />
     </div>
